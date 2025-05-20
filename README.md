@@ -28,8 +28,9 @@ want to work with different statistical tests than the ones used by SQUIRE.
 
 ## Software Requirements
 
-- [Poetry](https://github.com/python-poetry/poetry)
-- [Git](https://git-scm.com/)
+- [bash](https://www.gnu.org/software/bash/)
+- [poetry](https://github.com/python-poetry/poetry)
+- [git](https://git-scm.com/)
 
 ## Installation
 
