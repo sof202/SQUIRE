@@ -1,0 +1,25 @@
+[project]
+name = "squire"
+version = "0.1.0"
+description = "Statistical Quality Utility for Ideal Reference matrix Enhancement"
+authors = [
+    {name = "Sam Fletcher", email = "s.o.fletcher@exeter.ac.uk"},
+]
+license = { file = "LICENSE" }
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "numpy (>=2.2.6,<3.0.0)",
+    "pandas (>=2.2.3,<3.0.0)",
+    "statsmodels (>=0.14.4,<0.15.0)"
+]
+
+[project.urls]
+repository = "https://github.com/sof202/SQUIRE"
+
+[project.scripts]
+squire = "squire.cli:main"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
