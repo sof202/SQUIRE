@@ -1,9 +1,13 @@
 import argparse
 from importlib.metadata import version
 
-from squire.main import create_hdf, write_reference_matrix
+from squire.main import create_hdf, write_cpg_list, write_reference_matrix
 
-COMMAND_MAP = {"create": create_hdf, "reference": write_reference_matrix}
+COMMAND_MAP = {
+    "create": create_hdf,
+    "reference": write_reference_matrix,
+    "cpglist": write_cpg_list,
+}
 
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
@@ -131,7 +135,11 @@ def main():
     )
     parser_cpglist.add_argument("out_path", help="File path to write the CpG list to")
     parser_cpglist.add_argument(
-        "-t", "--threshold", help="The threshold to use when filtering", default=1e-10
+        "-t",
+        "--threshold",
+        help="The threshold to use when filtering",
+        default=1e-10,
+        type=float,
     )
 
     # -------------

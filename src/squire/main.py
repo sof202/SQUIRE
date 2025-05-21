@@ -6,7 +6,12 @@ from squire.hdf5store import (
     create_merged_dataset,
     generate_coordinate_index,
 )
-from squire.io import make_viable_path, read_file_of_files, export_reference_matrix
+from squire.io import (
+    export_cpg_list,
+    make_viable_path,
+    read_file_of_files,
+    export_reference_matrix,
+)
 from squire.stats import compute_p_values
 
 
@@ -38,4 +43,16 @@ def write_reference_matrix(args):
         export_reference_matrix(hdf5_path, ref_path)
     except (PermissionError, FileExistsError):
         print(f"SQUIRE failed to write to {ref_path}", file=stderr)
+        exit(1)
+
+
+def write_cpg_list(args):
+    hdf5_path = Path(args.hdf5)
+    cpg_list_path = Path(args.out_path)
+    try:
+        make_viable_path(hdf5_path)
+        make_viable_path(cpg_list_path, args.overwrite)
+        export_cpg_list(hdf5_path, cpg_list_path, args.threshold)
+    except (PermissionError, FileExistsError):
+        print(f"SQUIRE failed to write to {cpg_list_path}", file=stderr)
         exit(1)
