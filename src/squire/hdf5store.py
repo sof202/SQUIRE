@@ -10,16 +10,23 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
     mode_to_use = "w" if not os.path.exists(hdf_path) else "a"
     with pd.HDFStore(hdf_path, mode=mode_to_use) as store:
         columns_to_keep = [0, 1, 2, 3, 4, 11]
-        column_names = ["chr", "start", "end", "name", "read_depth", "modifications"]
+        basename = get_file_basename(file_path)
+        column_names = [
+            "chr",
+            "start",
+            "end",
+            "name",
+            f"{basename}_read_depth",
+            f"{basename}_modifications",
+        ]
         column_dtypes = {
             "chr": str,
             "start": int,
             "end": int,
             "name": str,
-            "read_depth": int,
-            "modifications": int,
+            f"{basename}_read_depth": int,
+            f"{basename}_modifications": int,
         }
-        basename = get_file_basename(file_path)
         for chunk in pd.read_csv(
             file_path,
             sep=r"\s+",  # bedmethyl has mix of tabs and spaces for separators
@@ -29,7 +36,11 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             dtype=column_dtypes,  # type: ignore[arg-type]
             chunksize=chunk_size,
         ):
-            chunk["fraction"] = chunk["modifications"] / chunk["read_depth"] * 100
+            chunk[f"{basename}_fraction"] = (
+                chunk[f"{basename}_modifications"]
+                / chunk[f"{basename}_read_depth"]
+                * 100
+            )
             if mode_to_use == "w":
                 store.append(
                     f"data/{basename}", chunk, format="table", data_columns=True
@@ -68,20 +79,27 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
         )
 
 
+def create_merged_dataset(hdf_path):
+    with pd.HDFStore(hdf_path, mode="a") as store:
+        coords = store["coordinates"]
+        merged = coords.set_index(["chr", "start", "end", "name"]).copy()
+        bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
+
+        for path in bedmethyl_paths:
+            bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
+            merged = merged.join(bedmethyl, how="left")
+        merged = merged.fillna(0)
+        store.put("merged_data", merged, format="table", data_columns=True)
+        for path in bedmethyl_paths:
+            store.remove(path)
+
+        store.remove("coordinates")
+
+
 def export_reference_matrix(hdf_path, out_file_path):
     with pd.HDFStore(hdf_path, mode="r") as store:
-        coordinates = store["coordinates"].set_index(["chr", "start", "end", "name"])
-        all_files = [coordinates]
-
-        for key in store.keys():
-            if "/data/" in key:
-                bedmethyl = store[key]
-                sample_name = key.replace("/data/", "")
-                bedmethyl = (
-                    bedmethyl[["chr", "start", "end", "name", "fraction"]]
-                    .set_index(["chr", "start", "end", "name"])
-                    .rename(columns={"fraction": sample_name})
-                )
-                all_files.append(bedmethyl)
-        reference_matrix = pd.concat(all_files, axis=1).fillna(0).reset_index()
-        reference_matrix.to_csv(out_file_path, sep="\t", header=False)
+        merged = store["merged_data"]
+        fraction_columns = [col for col in merged.columns if "_fraction" in col]
+        merged[fraction_columns].reset_index().to_csv(
+            out_file_path, sep="\t", float_format="%.3f", header=False
+        )
