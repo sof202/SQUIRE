@@ -7,7 +7,8 @@ def get_file_basename(file_path):
 
 
 def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
-    with pd.HDFStore(hdf_path, mode="a") as store:
+    mode_to_use = "w" if not os.path.exists(hdf_path) else "a"
+    with pd.HDFStore(hdf_path, mode=mode_to_use) as store:
         columns_to_keep = [0, 1, 2, 3, 4, 11]
         column_names = ["chr", "start", "end", "name", "read_depth", "modifications"]
         column_dtypes = {
