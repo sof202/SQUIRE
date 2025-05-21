@@ -1,6 +1,8 @@
 from pathlib import Path
 import pandas as pd
 
+from squire.squire_exceptions import BedMethylReadError, HDFReadError
+
 
 def read_file_of_files(path: Path):
     file_list = []
@@ -27,34 +29,34 @@ def make_viable_path(path: Path, exists_ok=True):
         raise PermissionError(f"You do not have permissions to create {path}.")
 
 
-def is_viable_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
+def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
     if not bedmethyl_path.exists():
-        return False
+        raise BedMethylReadError(f"{bedmethyl_path} does not exist.")
     if not bedmethyl_path.is_file():
-        return False
+        raise BedMethylReadError(f"{bedmethyl_path} is not a regular file.")
     if bedmethyl_path.stat().st_size == 0:
-        return False
+        raise BedMethylReadError(f"{bedmethyl_path} is empty.")
 
-    expected_dtypes = [
-        "str",  # chrom
-        "int64",  # start position
-        "int64",  # end position
-        "str",  # modified base code
-        "int64",  # score
-        "str",  # strand
-        "int64",  # start position (compat)
-        "int64",  # end position (compat)
-        "str",  # color
-        "int64",  # Nvalid_cov
-        "float64",  # fraction modified
-        "int64",  # Nmod
-        "int64",  # Ncanonical
-        "int64",  # Nother_mod
-        "int64",  # Ndelete
-        "int64",  # Nfail
-        "int64",  # Ndiff
-        "int64",  # Nnocall
-    ]
+    expected_dtypes = {
+        0: "str",  # chrom
+        1: "int64",  # start position
+        2: "int64",  # end position
+        3: "str",  # modified base code
+        4: "int64",  # score
+        5: "str",  # strand
+        6: "int64",  # start position
+        7: "int64",  # end position
+        8: "str",  # color
+        9: "int64",  # Nvalid_cov
+        10: "float64",  # fraction modified
+        11: "int64",  # Nmod
+        12: "int64",  # Ncanonical
+        13: "int64",  # Nother_mod
+        14: "int64",  # Ndelete
+        15: "int64",  # Nfail
+        16: "int64",  # Ndiff
+        17: "int64",  # Nnocall
+    }
 
     try:
         top_rows = pd.read_csv(
@@ -62,30 +64,39 @@ def is_viable_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
             sep=r"\s+",
             header=None,
             nrows=number_of_rows_to_check,
-            dtype={9: "str"},  # force color column to be string
+            dtype=expected_dtypes,  # type: ignore[arg-type]
         )
 
         if top_rows.shape[1] != 18:
-            return False
+            raise BedMethylReadError(
+                f"{bedmethyl_path} does not have 18 fields.\n"
+                "Ensure that it was created by ONT's modkit"
+            )
+    except (ValueError, pd.errors.ParserError) as e:
+        raise BedMethylReadError(
+            f"Type conversion failed in {bedmethyl_path}. "
+            f"File may contain invalid values for expected types.\n"
+            f"Error: {str(e)}"
+        ) from e
+    except TypeError as e:
+        raise BedMethylReadError(
+            f"Invalid type specification while reading {bedmethyl_path}\n"
+            f"Error: {str(e)}"
+        ) from e
+    except Exception as e:
+        raise BedMethylReadError(f"Unexpected error reading {bedmethyl_path}") from e
 
-        for i, (expected, actual) in enumerate(zip(expected_dtypes, top_rows.dtypes)):
-            if str(actual) != expected:
-                return False
 
-        return True
-
-    except Exception:
-        return False
-
-
-def is_viable_hdf5(hdf_path: Path):
-    if not hdf_path.exists() or not hdf_path.is_file():
-        return False
+def validate_hdf5(hdf_path: Path):
+    if not hdf_path.exists():
+        raise HDFReadError(f"{hdf_path} does not exist.")
+    if not hdf_path.is_file():
+        raise HDFReadError(f"{hdf_path} is not a regular file.")
     try:
         with pd.HDFStore(hdf_path, mode="r"):
             return True
-    except (OSError, IOError):
-        return False
+    except (OSError, IOError) as e:
+        raise HDFReadError(f"{hdf_path} is non-viable") from e
 
 
 def export_reference_matrix(hdf_path, out_file_path):
