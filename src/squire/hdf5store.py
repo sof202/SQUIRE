@@ -66,3 +66,22 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
         store.create_table_index(
             "coordinates", columns=["chr", "start", "end"], kind="full"
         )
+
+
+def export_reference_matrix(hdf_path, out_file_path):
+    with pd.HDFStore(hdf_path, mode="r") as store:
+        coordinates = store["coordinates"].set_index(["chr", "start", "end", "name"])
+        all_files = [coordinates]
+
+        for key in store.keys():
+            if "/data/" in key:
+                bedmethyl = store[key]
+                sample_name = key.replace("/data/", "")
+                bedmethyl = (
+                    bedmethyl[["chr", "start", "end", "name", "fraction"]]
+                    .set_index(["chr", "start", "end", "name"])
+                    .rename(columns={"fraction": sample_name})
+                )
+                all_files.append(bedmethyl)
+        reference_matrix = pd.concat(all_files, axis=1).fillna(0).reset_index()
+        reference_matrix.to_csv(out_file_path, sep="\t", header=False)
