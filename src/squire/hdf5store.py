@@ -30,7 +30,12 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             chunksize=chunk_size,
         ):
             chunk["fraction"] = chunk["modifications"] / chunk["read_depth"]
-            store.append(f"data/{basename}", chunk)
+            if mode_to_use == "w":
+                store.append(
+                    f"data/{basename}", chunk, format="table", data_columns=True
+                )
+            else:
+                store.append(f"data/{basename}", chunk)
 
 
 def generate_coordinate_index(hdf_path, chunk_size=100_000):
