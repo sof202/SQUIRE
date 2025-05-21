@@ -1,5 +1,4 @@
 from pathlib import Path
-from sys import stderr
 
 from squire.hdf5store import (
     add_file_to_hdf_store,
@@ -15,6 +14,7 @@ from squire.io import (
     export_reference_matrix,
 )
 from squire.reports import pvalue_threshold_report
+from squire.squire_exceptions import BedMethylReadError, HDFReadError, SquireError
 from squire.stats import compute_p_values
 
 
@@ -29,15 +29,14 @@ def create_hdf(args):
         for bedmethyl in file_list:
             bedmethyl = Path(bedmethyl)
             if not is_viable_bedmethyl(bedmethyl):
-                raise Exception(f"{bedmethyl} is not a viable bedmethyl file")
+                raise BedMethylReadError(f"{bedmethyl} is not a viable bedmethyl file")
             add_file_to_hdf_store(bedmethyl, hdf5_path)
         generate_coordinate_index(hdf5_path)
         create_merged_dataset(hdf5_path)
         compute_p_values(hdf5_path)
 
-    except (PermissionError, FileExistsError):
-        print(f"SQUIRE failed to create {hdf5_path}. Exiting...", file=stderr)
-        exit(1)
+    except (PermissionError, FileExistsError) as e:
+        raise SquireError(f"SQUIRE failed to create {hdf5_path}.") from e
 
 
 def write_reference_matrix(args):
@@ -45,12 +44,11 @@ def write_reference_matrix(args):
     ref_path = Path(args.out_path)
     try:
         if not is_viable_hdf5(hdf5_path):
-            raise Exception(f"{hdf5_path} is not a viable hdf5 file")
+            raise HDFReadError(f"{hdf5_path} is not a viable hdf5 file")
         make_viable_path(ref_path, args.overwrite)
         export_reference_matrix(hdf5_path, ref_path)
-    except (PermissionError, FileExistsError):
-        print(f"SQUIRE failed to write to {ref_path}", file=stderr)
-        exit(1)
+    except (PermissionError, FileExistsError) as e:
+        raise SquireError(f"SQUIRE failed to write to {ref_path}") from e
 
 
 def write_cpg_list(args):
@@ -58,11 +56,11 @@ def write_cpg_list(args):
     cpg_list_path = Path(args.out_path)
     try:
         if not is_viable_hdf5(hdf5_path):
-            raise Exception(f"{hdf5_path} is not a viable hdf5 file")
+            raise HDFReadError(f"{hdf5_path} is not a viable hdf5 file")
         make_viable_path(cpg_list_path, args.overwrite)
         export_cpg_list(hdf5_path, cpg_list_path, args.threshold)
-    except (PermissionError, FileExistsError):
-        print(f"SQUIRE failed to write to {cpg_list_path}", file=stderr)
+    except (PermissionError, FileExistsError) as e:
+        raise SquireError(f"SQUIRE failed to write to {cpg_list_path}") from e
         exit(1)
 
 
@@ -70,8 +68,8 @@ def print_threshold_analysis(args):
     hdf5_path = Path(args.hdf5)
     try:
         if not is_viable_hdf5(hdf5_path):
-            raise Exception(f"{hdf5_path} is not a viable hdf5 file")
+            raise HDFReadError(f"{hdf5_path} is not a viable hdf5 file")
         pvalue_threshold_report(hdf5_path, args.thresholds)
-    except (PermissionError, FileExistsError):
-        print("SQUIRE failed to report threshold analysis", file=stderr)
+    except (PermissionError, FileExistsError) as e:
+        raise SquireError("SQUIRE failed to report threshold analysis") from e
         exit(1)

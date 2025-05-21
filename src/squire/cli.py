@@ -1,5 +1,6 @@
 import argparse
 from importlib.metadata import version
+import sys
 
 from squire.main import (
     create_hdf,
@@ -7,6 +8,7 @@ from squire.main import (
     write_cpg_list,
     write_reference_matrix,
 )
+from squire.squire_exceptions import SquireError
 
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
@@ -178,7 +180,21 @@ COMMAND_MAP = {
 
 
 def run_squire(args):
-    command = COMMAND_MAP.get(args.command)
-    if command is None:
-        return 1
-    command(args)
+    try:
+        command = COMMAND_MAP.get(args.command)
+        if command is None:
+            raise SquireError(
+                f"{args.command} is not a valid squire command. "
+                "Run squire -h to view available commands"
+            )
+        command(args)
+    except SquireError as e:
+        print(f"Squire error: {e}", file=sys.stderr)
+        if e.__cause__:
+            print(f"Details: {e.__cause__}", file=sys.stderr)
+        sys.exit(1)
+    except Exception as e:
+        print(f"Uncaught error: {e}", file=sys.stderr)
+        if e.__cause__:
+            print(f"Details: {e.__cause__}", file=sys.stderr)
+        sys.exit(1)
