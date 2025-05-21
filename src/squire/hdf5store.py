@@ -29,7 +29,7 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             dtype=column_dtypes,  # type: ignore[arg-type]
             chunksize=chunk_size,
         ):
-            chunk["fraction"] = chunk["modifications"] / chunk["read_depth"]
+            chunk["fraction"] = chunk["modifications"] / chunk["read_depth"] * 100
             if mode_to_use == "w":
                 store.append(
                     f"data/{basename}", chunk, format="table", data_columns=True
