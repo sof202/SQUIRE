@@ -8,3 +8,12 @@ def export_reference_matrix(hdf_path, out_file_path):
         merged[fraction_columns].reset_index().to_csv(
             out_file_path, sep="\t", float_format="%.3f", header=False
         )
+
+
+def export_cpg_list(hdf_path, out_file_path, significance_threshold):
+    with pd.HDFStore(hdf_path, mode="r") as store:
+        cpg_list = store["stats"]
+        cpg_list = cpg_list[cpg_list["p_value"] < significance_threshold]
+        cpg_list[["chr", "start", "end", "name"]].to_csv(
+            out_file_path, sep="\t", header=False
+        )
