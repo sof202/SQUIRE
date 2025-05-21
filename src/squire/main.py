@@ -12,6 +12,7 @@ from squire.io import (
     read_file_of_files,
     export_reference_matrix,
 )
+from squire.reports import pvalue_threshold_report
 from squire.stats import compute_p_values
 
 
@@ -55,4 +56,14 @@ def write_cpg_list(args):
         export_cpg_list(hdf5_path, cpg_list_path, args.threshold)
     except (PermissionError, FileExistsError):
         print(f"SQUIRE failed to write to {cpg_list_path}", file=stderr)
+        exit(1)
+
+
+def print_threshold_analysis(args):
+    hdf5_path = Path(args.hdf5)
+    try:
+        make_viable_path(hdf5_path)
+        pvalue_threshold_report(hdf5_path, args.thresholds)
+    except (PermissionError, FileExistsError):
+        print(f"SQUIRE failed to report threshold analysis", file=stderr)
         exit(1)

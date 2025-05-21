@@ -1,12 +1,18 @@
 import argparse
 from importlib.metadata import version
 
-from squire.main import create_hdf, write_cpg_list, write_reference_matrix
+from squire.main import (
+    create_hdf,
+    print_threshold_analysis,
+    write_cpg_list,
+    write_reference_matrix,
+)
 
 COMMAND_MAP = {
     "create": create_hdf,
     "reference": write_reference_matrix,
     "cpglist": write_cpg_list,
+    "report": print_threshold_analysis,
 }
 
 
@@ -55,6 +61,13 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
 
 def file_list(string):
     return [file for file in string.casefold().split(",")]
+
+
+def float_list(string):
+    try:
+        return [float(number) for number in string.split(",")]
+    except ValueError:
+        raise ValueError("Thresholds must be comma separated list of floats")
 
 
 def main():
@@ -156,6 +169,7 @@ def main():
         "--thresholds",
         help="A list of thresholds to report on",
         default=[1e-1, 1e-2, 1e-5, 1e-10, 1e-20],
+        type=float_list,
     )
     args = parser.parse_args()
 
