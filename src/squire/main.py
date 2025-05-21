@@ -6,8 +6,7 @@ from squire.hdf5store import (
     create_merged_dataset,
     generate_coordinate_index,
 )
-from squire.io import make_viable_path, read_file_of_files
-from squire.outputs import export_reference_matrix
+from squire.io import make_viable_path, read_file_of_files, export_reference_matrix
 from squire.stats import compute_p_values
 
 
