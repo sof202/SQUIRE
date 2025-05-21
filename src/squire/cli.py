@@ -60,6 +60,12 @@ def main():
         add_help=False, formatter_class=SquireSubparserHelpFormatter
     )
     shared_parser.add_argument("-d", "--hdf5", required=True, help="Path to hdf5 file")
+    shared_parser.add_argument(
+        "-o",
+        "--overwrite",
+        action="store_true",
+        help="If this flag is set, output files can be overwritten.",
+    )
 
     subparsers = parser.add_subparsers(
         dest="command",
