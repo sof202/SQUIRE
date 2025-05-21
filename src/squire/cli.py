@@ -1,6 +1,10 @@
 import argparse
 from importlib.metadata import version
 
+from squire.main import create_hdf
+
+COMMAND_MAP = {"create": create_hdf}
+
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
     def _format_action(self, action):
@@ -146,3 +150,8 @@ def main():
         default=[1e-1, 1e-2, 1e-5, 1e-10, 1e-20],
     )
     args = parser.parse_args()
+
+    command = COMMAND_MAP.get(args.command)
+    if command is None:
+        return 1
+    command(args)
