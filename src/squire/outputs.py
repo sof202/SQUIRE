@@ -6,7 +6,7 @@ def export_reference_matrix(hdf_path, out_file_path):
         merged = store["merged_data"]
         fraction_columns = [col for col in merged.columns if "_fraction" in col]
         merged[fraction_columns].reset_index().to_csv(
-            out_file_path, sep="\t", float_format="%.3f", header=False
+            out_file_path, sep="\t", float_format="%.3f", header=False, index=False
         )
 
 
@@ -15,5 +15,5 @@ def export_cpg_list(hdf_path, out_file_path, significance_threshold):
         cpg_list = store["stats"]
         cpg_list = cpg_list[cpg_list["p_value"] < significance_threshold]
         cpg_list[["chr", "start", "end", "name"]].to_csv(
-            out_file_path, sep="\t", header=False
+            out_file_path, sep="\t", header=False, index=False
         )
