@@ -8,13 +8,6 @@ from squire.main import (
     write_reference_matrix,
 )
 
-COMMAND_MAP = {
-    "create": create_hdf,
-    "reference": write_reference_matrix,
-    "cpglist": write_cpg_list,
-    "report": print_threshold_analysis,
-}
-
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
     def _format_action(self, action):
@@ -173,6 +166,18 @@ def main():
     )
     args = parser.parse_args()
 
+    run_squire(args)
+
+
+COMMAND_MAP = {
+    "create": create_hdf,
+    "reference": write_reference_matrix,
+    "cpglist": write_cpg_list,
+    "report": print_threshold_analysis,
+}
+
+
+def run_squire(args):
     command = COMMAND_MAP.get(args.command)
     if command is None:
         return 1
