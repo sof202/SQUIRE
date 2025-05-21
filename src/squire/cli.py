@@ -1,9 +1,9 @@
 import argparse
 from importlib.metadata import version
 
-from squire.main import create_hdf
+from squire.main import create_hdf, write_reference_matrix
 
-COMMAND_MAP = {"create": create_hdf}
+COMMAND_MAP = {"create": create_hdf, "reference": write_reference_matrix}
 
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
