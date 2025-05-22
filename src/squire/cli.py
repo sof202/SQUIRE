@@ -168,7 +168,7 @@ def main() -> None:
 
     subparsers.add_parser(
         "add",
-        help="add to a hdf5 file with additional bedmethyl files",
+        help="Add to a hdf5 file with additional bedmethyl files",
         parents=[shared_parser, parser_hdf],
         formatter_class=SquireSubparserHelpFormatter,
     )
