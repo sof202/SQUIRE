@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import LiteralString
 
 from squire.main import (
+    add_to_hdf,
     create_hdf,
     print_threshold_analysis,
     write_cpg_list,
@@ -126,15 +127,10 @@ def main() -> None:
     )
 
     # -------------
-    # CREATE
+    # CREATE/ADD
     # -------------
-    parser_create = subparsers.add_parser(
-        "create",
-        help="Initialise the hdf5 file containing all data",
-        parents=[shared_parser],
-        formatter_class=SquireSubparserHelpFormatter,
-    )
-    input_group = parser_create.add_argument_group(
+    parser_hdf = argparse.ArgumentParser(add_help=False)
+    input_group = parser_hdf.add_argument_group(
         "input options (use one of)",
         description=(
             "Specify input files using either --bedmethyl-list OR --file"
@@ -161,6 +157,20 @@ def main() -> None:
             "bedmethyl files"
         ),
         type=Path,
+    )
+
+    subparsers.add_parser(
+        "create",
+        help="Initialise the hdf5 file containing all data",
+        parents=[shared_parser, parser_hdf],
+        formatter_class=SquireSubparserHelpFormatter,
+    )
+
+    subparsers.add_parser(
+        "add",
+        help="add to a hdf5 file with additional bedmethyl files",
+        parents=[shared_parser, parser_hdf],
+        formatter_class=SquireSubparserHelpFormatter,
     )
 
     # -------------
@@ -232,6 +242,7 @@ def main() -> None:
 
 COMMAND_MAP = {
     "create": create_hdf,
+    "add": add_to_hdf,
     "reference": write_reference_matrix,
     "cpglist": write_cpg_list,
     "report": print_threshold_analysis,

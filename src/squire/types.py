@@ -61,6 +61,7 @@ def convert_to_squire_args(args: argparse.Namespace) -> SquireArgs:
 
     command_map = {
         "create": CreateArgs,
+        "add": CreateArgs,
         "reference": ReferenceArgs,
         "cpglist": CpGListArgs,
         "report": ReportArgs,

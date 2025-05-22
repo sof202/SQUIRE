@@ -137,3 +137,19 @@ def create_merged_dataset(hdf_path: Path) -> None:
             store.remove(path)
 
         store.remove("coordinates")
+
+
+def add_to_merged_dataset(hdf_path: Path) -> None:
+    """Add newly parsed files in /data/ to merged_data in hdf5 file"""
+    with pd.HDFStore(hdf_path, mode="a") as store:
+        merged = store["merged_data"]
+        bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
+
+        for path in bedmethyl_paths:
+            bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
+            merged = merged.join(bedmethyl, how="left")
+        merged = merged.fillna(0)
+        store.put("merged_data", merged, format="table", data_columns=True)
+
+        for path in bedmethyl_paths:
+            store.remove(path)

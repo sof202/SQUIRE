@@ -85,7 +85,7 @@ def chi_squared_contingency(
     )
     try:
         _, p_value, _, _ = chi2_contingency(contingency_table)
-        return np.array(p_value)
+        return p_value  # type: ignore[reportReturnType]
     except ValueError:
         return 1
 

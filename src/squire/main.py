@@ -2,6 +2,7 @@ from pathlib import Path
 
 from squire.hdf5store import (
     add_file_to_hdf_store,
+    add_to_merged_dataset,
     create_merged_dataset,
     generate_coordinate_index,
 )
@@ -57,6 +58,28 @@ def create_hdf(args: CreateArgs) -> None:
 
     except (PermissionError, FileExistsError) as e:
         raise SquireError(f"SQUIRE failed to create {args.hdf5}.") from e
+
+
+def add_to_hdf(args):
+    """Add to the hdf5 file and recalculate statistics"""
+    try:
+        validate_hdf5(args.hdf5)
+        file_list = (
+            read_file_of_files(args.file)
+            if args.file is not None
+            else args.bedmethyl_list
+        )
+        assert file_list is not None
+
+        for bedmethyl in file_list:
+            bedmethyl = Path(bedmethyl)
+            validate_bedmethyl(bedmethyl)
+            add_file_to_hdf_store(bedmethyl, args.hdf5)
+
+        add_to_merged_dataset(args.hdf5)
+        compute_p_values(args.hdf5)
+    except (PermissionError, FileExistsError) as e:
+        raise SquireError(f"SQUIRE failed to update {args.hdf5}") from e
 
 
 def write_reference_matrix(args: ReferenceArgs) -> None:
