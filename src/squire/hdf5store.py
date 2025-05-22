@@ -110,6 +110,21 @@ def generate_coordinate_index(
         )
 
 
+def add_bedmethyls_to_merged_data(
+    store: pd.HDFStore, merged: pd.DataFrame
+) -> None:
+    """Add bedmethyl files to the combined merged data"""
+    bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
+
+    for path in bedmethyl_paths:
+        bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
+        merged = merged.join(bedmethyl, how="left")
+    merged = merged.fillna(0)
+    store.put("merged_data", merged, format="table", data_columns=True)
+    for path in bedmethyl_paths:
+        store.remove(path)
+
+
 def create_merged_dataset(hdf_path: Path) -> None:
     """Merges all parsed bedmethyl files into a single dataframe
 
@@ -126,30 +141,11 @@ def create_merged_dataset(hdf_path: Path) -> None:
     with pd.HDFStore(hdf_path, mode="a") as store:
         coords = store["coordinates"]
         merged = coords.set_index(["chr", "start", "end", "name"]).copy()
-        bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
-
-        for path in bedmethyl_paths:
-            bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
-            merged = merged.join(bedmethyl, how="left")
-        merged = merged.fillna(0)
-        store.put("merged_data", merged, format="table", data_columns=True)
-        for path in bedmethyl_paths:
-            store.remove(path)
-
+        add_bedmethyls_to_merged_data(store, merged)
         store.remove("coordinates")
 
 
 def add_to_merged_dataset(hdf_path: Path) -> None:
     """Add newly parsed files in /data/ to merged_data in hdf5 file"""
     with pd.HDFStore(hdf_path, mode="a") as store:
-        merged = store["merged_data"]
-        bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
-
-        for path in bedmethyl_paths:
-            bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
-            merged = merged.join(bedmethyl, how="left")
-        merged = merged.fillna(0)
-        store.put("merged_data", merged, format="table", data_columns=True)
-
-        for path in bedmethyl_paths:
-            store.remove(path)
+        add_bedmethyls_to_merged_data(store, store["merged_data"])
