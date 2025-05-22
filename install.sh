@@ -6,7 +6,7 @@ DEFAULT_INSTALL_DIR="${HOME}/.local/bin"
 usage() {
 cat << EOF
 ================================================
-$0
+$(basename "$0")
 ================================================
 Purpose: Install SQUIRE into the given directory
 Args:
