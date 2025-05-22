@@ -1,6 +1,6 @@
 import argparse
-from importlib.metadata import version
 import sys
+from importlib.metadata import version
 
 from squire.main import (
     create_hdf,

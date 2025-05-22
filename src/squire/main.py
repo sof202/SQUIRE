@@ -7,11 +7,11 @@ from squire.hdf5store import (
 )
 from squire.io import (
     export_cpg_list,
-    validate_bedmethyl,
-    validate_hdf5,
+    export_reference_matrix,
     make_viable_path,
     read_file_of_files,
-    export_reference_matrix,
+    validate_bedmethyl,
+    validate_hdf5,
 )
 from squire.reports import pvalue_threshold_report
 from squire.squire_exceptions import SquireError

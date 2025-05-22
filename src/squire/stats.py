@@ -1,7 +1,8 @@
 import multiprocessing
-import pandas as pd
 from multiprocessing import Pool
+
 import numpy as np
+import pandas as pd
 from scipy.stats import chi2_contingency
 from statsmodels.stats.proportion import proportions_ztest
 

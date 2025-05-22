@@ -1,4 +1,5 @@
 from pathlib import Path
+
 import pandas as pd
 
 from squire.squire_exceptions import BedMethylReadError, HDFReadError
