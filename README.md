@@ -22,12 +22,12 @@
 
 ## Description
 
-SQUIRE(Statistical Quality Utility for Ideal Reference matrix Enhancement) is a
-set of python scripts that are to be used with
+SQUIRE (Statistical Quality Utility for Ideal Reference matrix Enhancement) is
+a python CLI tool that can assist the usage of 
 [HyLoRD](https://github.com/sof202/HyLoRD). The
 [inputs](https://sof202.github.io/HyLoRD/inputs-outputs.html) of HyLoRD include
 a reference matrix and a list of 'useful' CpGs, however the creation of these
-files is not necessarily trivial. 
+files is non-trivial. 
 
 SQUIRE will:
 
@@ -36,6 +36,7 @@ SQUIRE will:
 (`--reference-matrix`).
 - Apply statistical tests to each CpG site which can be used for filtering 
 when creating a list of useful CpGs (`--cpg-list`).
+  - Increasing performance considerably
 
 ### Why not package with HyLoRD
 
@@ -43,6 +44,8 @@ User's might have their own ideas on how to generate the input files for
 HyLoRD. Maybe they don't have cell sorted ONT data and instead just want to
 work with WGBS data (more available, but accuracy will suffer). Perhaps they
 want to work with different statistical tests than the ones used by SQUIRE.
+For these reasons, SQUIRE has been made independent from HyLoRD as it is
+completely optional.
 
 ## Software Requirements
 
@@ -57,7 +60,7 @@ First install the project with:
 ```bash
 git clone https://github.com/sof202/SQUIRE.git
 cd SQUIRE
-# installs to ~/.local/bin
+# Installs to ~/.local/bin
 ./install.sh 
 ```
 
@@ -69,8 +72,9 @@ cd SQUIRE
 ./install.sh path/to/install/directory
 ```
 
-Provided that the installation directory is on your `PATH`, you can run
-SQUIRE via:
+Provided that the installation directory is on your `PATH` (the installation
+script will tell you how to do this if this isn't the case), you can run SQUIRE
+via:
 
 ```bash
 # Print help message for squire
@@ -90,14 +94,14 @@ poetry update
 ## Usage
 
 Upon [installing](#installation) SQUIRE successfully, you will have a suite of
-tools avaible to you via subcommands of `squire`. Full details for which
+tools available to you via subcommands of `squire`. Full details for which
 can be found via:
 
 ```bash
 squire [subcommand] --help
 ```
 
-Typical usage would be:
+Typical (bare-bones) usage might be:
 
 ```bash
 squire create -d squire.h5 -b bedmethyl1.bed,bedmethyl2.bed,...,bedmethyln.bed
@@ -105,13 +109,13 @@ squire reference -d squire.h5 reference_matrix.bed
 squire cpglist -d squire.h5 cpg_list.bed
 ```
 
-Further examples can be found in `scripts/`.
+Further, more in-depth, examples can be found in `scripts/`.
 
 ### Job schedulers
 
 It is fairly likely that SQUIRE will take some time to complete statistical
 tests (especially if the number of samples is high). In the event that the user
 has access to a HPC (common in bioinformatics) they may want to utilise a job
-scheduler (such as SLURM, PBS or TORQUE) to run SQUIRE. Example scripts for
-such uses of SQUIRE can be found in `scripts/`. These scripts are not
+scheduler (such as SLURM, PBS or TORQUE *etc.*) to run SQUIRE. Example scripts
+for such uses of SQUIRE can be found in `scripts/`. These scripts are not
 comprehensive, but should be a sufficient starting point.
