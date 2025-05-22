@@ -1,11 +1,35 @@
 #!/bin/bash
 set -e
 
+DEFAULT_INSTALL_DIR="${HOME}/.local/bin"
+
+usage() {
+cat << EOF
+================================================
+$0
+================================================
+Purpose: Install SQUIRE into the given directory
+Args:
+    \$1 -> Installation directory 
+           (default: ${DEFAULT_INSTALL_DIR})
+================================================
+EOF
+exit 0
+}
+
+while getopts h OPT; do
+    case "$OPT" in
+        h ) usage ;;
+        \? ) usage ;;
+    esac
+done
+
+shift $((OPTIND-1))
+
 # -----------------
 # Install directory
 # -----------------
 
-DEFAULT_INSTALL_DIR="${HOME}/.local/bin"
 install_dir="${1:-$DEFAULT_INSTALL_DIR}"
 
 echo "Installing SQUIRE into: ${install_dir}"
