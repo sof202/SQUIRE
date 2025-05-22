@@ -95,12 +95,14 @@ def main():
     shared_parser = argparse.ArgumentParser(
         add_help=False, formatter_class=SquireSubparserHelpFormatter
     )
-    shared_parser.add_argument("-d", "--hdf5", required=True, help="Path to hdf5 file")
+    shared_parser.add_argument(
+        "-d", "--hdf5", required=True, help="Path to hdf5 file (e.g. ./squire.h5)"
+    )
     shared_parser.add_argument(
         "-o",
         "--overwrite",
         action="store_true",
-        help="If this flag is set, output files can be overwritten.",
+        help="If this flag is set, output files can be overwritten",
     )
 
     subparsers = parser.add_subparsers(
@@ -114,7 +116,7 @@ def main():
     # -------------
     parser_create = subparsers.add_parser(
         "create",
-        help="Initialise the hdf5 file containing all data.",
+        help="Initialise the hdf5 file containing all data",
         parents=[shared_parser],
         formatter_class=SquireSubparserHelpFormatter,
     )
@@ -127,7 +129,10 @@ def main():
     bedmethyl_parse_group.add_argument(
         "-b",
         "--bedmethyl-list",
-        help="Comma separated list of paths to bedmethyl files",
+        help=(
+            "Comma separated list of paths to bedmethyl files "
+            "(e.g. neuron.bed,glia.bed,astrocyte.bed)"
+        ),
         type=file_list,
     )
     bedmethyl_parse_group.add_argument(
@@ -146,7 +151,10 @@ def main():
         formatter_class=SquireSubparserHelpFormatter,
     )
     parser_reference.add_argument(
-        "out_path", help="File path to write the reference matrix to"
+        "out_path",
+        help=(
+            "File path to write the reference matrix to (e.g. ./reference_matrix.bed)"
+        ),
     )
 
     # -------------
@@ -161,7 +169,9 @@ def main():
         parents=[shared_parser],
         formatter_class=SquireSubparserHelpFormatter,
     )
-    parser_cpglist.add_argument("out_path", help="File path to write the CpG list to")
+    parser_cpglist.add_argument(
+        "out_path", help="File path to write the CpG list to (e.g. ./cpg_list.bed)"
+    )
     parser_cpglist.add_argument(
         "-t",
         "--threshold",
@@ -182,7 +192,10 @@ def main():
     parser_report.add_argument(
         "-t",
         "--thresholds",
-        help="A list of thresholds to report on",
+        help=(
+            "A comma separated list of thresholds to report on "
+            "(e.g. 0.1,0.001,0.0001,1e-10)"
+        ),
         default=[1e-1, 1e-2, 1e-5, 1e-10, 1e-20],
         type=float_list,
     )
