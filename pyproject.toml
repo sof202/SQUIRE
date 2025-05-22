@@ -27,6 +27,17 @@ line-length=79
 indent-width=4
 target-version = "py312"
 
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "UP",
+    "B",
+    "SIM",
+    "ANN",
+    "I",
+]
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
