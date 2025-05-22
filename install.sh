@@ -7,6 +7,15 @@ set -e
 
 DEFAULT_INSTALL_DIR="${HOME}/.local/bin"
 install_dir="${1:-$DEFAULT_INSTALL_DIR}"
+
+echo "Installing SQUIRE into: ${install_dir}"
+echo "Is this ok? (y/n) "
+read -r response
+
+if [[ "${response}" != "y" ]]; then 
+    usage
+fi
+
 mkdir -p "${install_dir}"
 
 # -------------------
