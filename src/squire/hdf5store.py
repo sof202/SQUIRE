@@ -36,6 +36,9 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             dtype=column_dtypes,  # type: ignore[arg-type]
             chunksize=chunk_size,
         ):
+            # Although this value exists in the bedmethyl file, calculating
+            # this value instead of reading (and parsing) the field will be
+            # as fast if not faster.
             chunk[f"{basename}_fraction"] = (
                 chunk[f"{basename}_modifications"]
                 / chunk[f"{basename}_read_depth"]
