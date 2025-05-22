@@ -79,6 +79,16 @@ can be found via:
 squire [subcommand] --help
 ```
 
+Typical usage would be:
+
+```bash
+squire create -d squire.h5 -b bedmethyl1.bed,bedmethyl2.bed,...,bedmethyln.bed
+squire reference -d squire.h5 reference_matrix.bed
+squire cpglist -d squire.h5 cpg_list.bed
+```
+
+Further examples can be found in `scripts/`.
+
 ### Job schedulers
 
 It is fairly likely that SQUIRE will take some time to complete statistical
