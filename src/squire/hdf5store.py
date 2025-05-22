@@ -3,10 +3,27 @@ import pandas as pd
 
 
 def get_file_basename(file_path):
+    """Get the basename of a file for organisational purposes"""
     return os.path.splitext(os.path.basename(file_path))[0]
 
 
 def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
+    """Add bedmethyl data to a hdf5 store
+
+    Only 6 columns are extracted from bedmethyl files:
+        - chromosome
+        - start
+        - end
+        - name(m/h)
+        - read depth
+        - number of modifications observed
+
+    For each genomic loci, the fraction modified is calculated as well.
+    Although this value exists in the bedmethyl file, calculating this value
+    instead of reading (and parsing) the field will be as fast if not faster.
+
+    Files are read and parsed in chunks to save on memory.
+    """
     mode_to_use = "w" if not os.path.exists(hdf_path) else "a"
     with pd.HDFStore(hdf_path, mode=mode_to_use) as store:
         columns_to_keep = [0, 1, 2, 3, 4, 11]
@@ -36,9 +53,6 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             dtype=column_dtypes,  # type: ignore[arg-type]
             chunksize=chunk_size,
         ):
-            # Although this value exists in the bedmethyl file, calculating
-            # this value instead of reading (and parsing) the field will be
-            # as fast if not faster.
             chunk[f"{basename}_fraction"] = (
                 chunk[f"{basename}_modifications"]
                 / chunk[f"{basename}_read_depth"]
@@ -53,6 +67,7 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
 
 
 def generate_coordinate_index(hdf_path, chunk_size=100_000):
+    """Generates a full index of genomic loci coordinates from hdf5 store"""
     with pd.HDFStore(hdf_path, mode="a") as store:
         all_coordinates = []
         data_paths = [key for key in store.keys() if key.startswith("/data/")]
@@ -83,6 +98,18 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
 
 
 def create_merged_dataset(hdf_path):
+    """Merges all parsed bedmethyl files into a single dataframe
+
+    Using a hdf5 store and the coordinate index created from
+    `generate_coordinate_index`, each stored pandas dataframe will be merged
+    into a single dataframe (aligned on the coordinate index).
+
+    All NaN entries will be converted to 0 so as to avoid differening line
+    lengths when exporting the data to a reference matrix.
+
+    Also removes coordinate index and individually stored bedmethyl files so as
+    to avoid file bloat.
+    """
     with pd.HDFStore(hdf_path, mode="a") as store:
         coords = store["coordinates"]
         merged = coords.set_index(["chr", "start", "end", "name"]).copy()

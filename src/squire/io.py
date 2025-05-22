@@ -5,6 +5,7 @@ from squire.squire_exceptions import BedMethylReadError, HDFReadError
 
 
 def read_file_of_files(path: Path):
+    """Read and parse a fof into a list of paths"""
     file_list = []
     with open(path, mode="r") as fof:
         for file in fof:
@@ -13,12 +14,21 @@ def read_file_of_files(path: Path):
 
 
 def make_parents(path: Path):
+    """Makes parent directories for a file path"""
     parent_dir = path.parent
     if not parent_dir.exists():
         parent_dir.mkdir(parents=True, exist_ok=True)
 
 
 def make_viable_path(path: Path, exists_ok=True):
+    """Ensures a path is viable to use by squire
+
+    Parameters
+    ---
+    exists_ok: bool
+        squire overwrites files, so if this isn't desired (user specified)
+        file existance will raise an error.
+    """
     try:
         if (not exists_ok) and (path.exists()):
             raise FileExistsError(
@@ -30,6 +40,17 @@ def make_viable_path(path: Path, exists_ok=True):
 
 
 def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
+    """Validates the format of a bedmethyl file
+
+    Bedmethyl files have a specific format outlined by ONT's modkit. This
+    will attempt to verify whether a file fits said format.
+
+    Parameters
+    ---
+    number_of_rows_to_check: int
+        The number of rows to use when validating the file format. If the file
+        is malformed beyond these lines, this function will not report it.
+    """
     if not bedmethyl_path.exists():
         raise BedMethylReadError(f"{bedmethyl_path} does not exist.")
     if not bedmethyl_path.is_file():
@@ -88,6 +109,7 @@ def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
 
 
 def validate_hdf5(hdf_path: Path):
+    """Validates the format of a hdf5 file"""
     if not hdf_path.exists():
         raise HDFReadError(f"{hdf_path} does not exist.")
     if not hdf_path.is_file():
@@ -100,6 +122,18 @@ def validate_hdf5(hdf_path: Path):
 
 
 def export_reference_matrix(hdf_path, out_file_path):
+    """Writes reference matrix to file from hdf5 file
+
+    Reference matrix is a tab separated file with the columns:
+        - chromosome
+        - start
+        - end
+        - name(m/h)
+        - fraction modified cell type 1
+        - fraction modified cell type 2
+        - ...
+        - fraction modified cell type n
+    """
     with pd.HDFStore(hdf_path, mode="r") as store:
         merged = store["merged_data"]
         fraction_columns = [col for col in merged.columns if "_fraction" in col]
@@ -109,6 +143,19 @@ def export_reference_matrix(hdf_path, out_file_path):
 
 
 def export_cpg_list(hdf_path, out_file_path, significance_threshold):
+    """Writes a list of genomic loci that pass a significance theshold
+
+    CpG list is a tab separated file with the columns:
+        - chromosome
+        - start
+        - end
+        - name(m/h)
+
+    Parameters
+    ---
+    significance_threshold: float
+        The threshold by which the genomic loci are filtered on
+    """
     with pd.HDFStore(hdf_path, mode="r") as store:
         cpg_list = store["stats"]
         cpg_list = cpg_list[cpg_list["p_value"] < significance_threshold]

@@ -2,6 +2,7 @@ import pandas as pd
 
 
 def pvalue_threshold_report(hdf_store, threshold_list):
+    """Print number of genomic loci that pass a certain pvalue threshold"""
     with pd.HDFStore(hdf_store, mode="r") as store:
         stats = store["stats"]
         for threshold in threshold_list:

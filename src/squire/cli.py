@@ -12,6 +12,12 @@ from squire.squire_exceptions import SquireError
 
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
+    """Formatter for squire -h
+
+    Format streamlines the available commands by removing the duplicated
+    {command 1, command 2, command 3} string
+    """
+
     def _format_action(self, action):
         if isinstance(action, argparse._SubParsersAction):
             parts = []
@@ -22,6 +28,13 @@ class SquireMainHelpFormatter(argparse.HelpFormatter):
 
 
 class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
+    """Formatter for squire subcommand -h
+
+    - Removes the metavariables from short/long options (declutter)
+    - Adds [REQUIRED] before required options
+    - Places default lists on a new line for each option
+    """
+
     def _format_action_invocation(self, action):
         if not action.option_strings:
             (metavar,) = self._metavar_formatter(action, action.dest)(1)
@@ -55,11 +68,12 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
 
 
 def file_list(string):
-    return [file for file in string.casefold().split(",")]
+    """Convert a comma separated string into a list of file paths"""
     return [file for file in string.split(",")]
 
 
 def float_list(string):
+    """Convert a comma separated string into a list of floats"""
     try:
         return [float(number) for number in string.split(",")]
     except ValueError:
@@ -67,6 +81,11 @@ def float_list(string):
 
 
 def main():
+    """Main entry point for squire
+
+    Handles argument parsing for the main parser and all subparsers
+    (subcommands)
+    """
     parser = argparse.ArgumentParser(
         prog="squire",
         description="A utility to generate inputs for HyLoRD",
@@ -181,6 +200,7 @@ COMMAND_MAP = {
 
 
 def run_squire(args):
+    """Runs functions to execute squire subcommands"""
     try:
         command = COMMAND_MAP.get(args.command)
         if command is None:

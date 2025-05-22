@@ -7,6 +7,7 @@ from statsmodels.stats.proportion import proportions_ztest
 
 
 def generate_batch(store, chunk_size):
+    """Generator function producing batches of merged data within hdf5 store"""
     bedmethyls = sorted(
         {
             col.split("_")[0]
@@ -36,6 +37,11 @@ def generate_batch(store, chunk_size):
 
 
 def two_proportion_z_test(counts, read_depths):
+    """Wrapper for proportions_ztest
+
+    Handles scenarios that will break proportions_ztest, returning 1 instead
+    np.nan. A value of 1 makes more sense for a p_value.
+    """
     valid_indexes = read_depths > 0
     if sum(valid_indexes) < 2:
         return 1
@@ -46,6 +52,11 @@ def two_proportion_z_test(counts, read_depths):
 
 
 def chi_squared_contingency(counts, read_depths):
+    """Wrapper for chi2_contigency
+
+    Returns 1 on failure and creates the contingency table to be used by
+    the function
+    """
     valid_indexes = read_depths > 0
     if sum(valid_indexes) < 2:
         return 1
@@ -60,12 +71,36 @@ def chi_squared_contingency(counts, read_depths):
 
 
 def process_row(row, stats_function):
+    """Helper function for mulitprocessing map"""
     id, counts, read_depths = row
     p_value = stats_function(counts, read_depths)
     return (*id, p_value)
 
 
 def compute_p_values(hdf_path, n_processes=None, chunk_size=100_000):
+    """Main function for computing p-values for generating cpg lists
+
+    A statistical test is applied to each genomic locus present in the samples
+    in the hdf5 file. The hypotheses are as follows:
+        H_0: Genomic locus has the same underlying methylation distribution
+             for all provided cell types
+        H_1: Genomic locus has different underlying methylation distributions
+             for all provided cell types
+
+    In general, methylation profiles at each genomic locus for each cell type
+    is expected to be normally distributed.
+
+    If there are two samples only, a two-proportion z-test is used.
+    If there are more than two samples, a chi squared test is used.
+
+    This function creates a pandas dataframe in the given hdf5 store with
+    the columns:
+        - chromosome
+        - start
+        - end
+        - name(m/h)
+        - p_value from statistical test
+    """
     if n_processes is None:
         n_processes = multiprocessing.cpu_count() - 1 or 1
 
