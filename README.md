@@ -1,4 +1,14 @@
-# SQUIRE
+<p align="center">
+  <img style="border-radius:10px" src="https://github.com/user-attachments/assets/1e82a815-8bab-4f48-8f28-0960c223eb54" />
+</p>
+
+</p>
+<p align="center">
+    <a href="https://github.com/sof202/SQUIRE/commits/main/" alt="Commit activity">
+        <img src="https://img.shields.io/github/commit-activity/m/sof202/SQUIRE?style=for-the-badge&color=green" /></a>
+    <a href="https://github.com/sof202/SQUIRE/blob/main/LICENSE" alt="License">
+        <img src="https://img.shields.io/github/license/sof202/SQUIRE?style=for-the-badge&color=green" /></a>
+</p>
 
 ## Table of contents
 
