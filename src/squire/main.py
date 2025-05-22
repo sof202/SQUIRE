@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from squire.hdf5store import (
     add_file_to_hdf_store,
     add_to_merged_dataset,
