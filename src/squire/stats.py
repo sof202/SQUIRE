@@ -61,7 +61,10 @@ def chi_squared_contingency(counts, read_depths):
     if sum(valid_indexes) < 2:
         return 1
     contingency_table = np.vstack(
-        [counts[valid_indexes], read_depths[valid_indexes] - counts[valid_indexes]]
+        [
+            counts[valid_indexes],
+            read_depths[valid_indexes] - counts[valid_indexes],
+        ]
     )
     try:
         _, p_value, _, _ = chi2_contingency(contingency_table)
@@ -106,7 +109,9 @@ def compute_p_values(hdf_path, n_processes=None, chunk_size=100_000):
 
     with pd.HDFStore(hdf_path, mode="r") as store:
         sample_count = sum(
-            1 for col in store["merged_data"].columns if "_modifications" in col
+            1
+            for col in store["merged_data"].columns
+            if "_modifications" in col
         )
 
         if sample_count == 1:
@@ -121,7 +126,9 @@ def compute_p_values(hdf_path, n_processes=None, chunk_size=100_000):
             with Pool(n_processes) as pool:
                 from functools import partial
 
-                process_function = partial(process_row, stats_function=stats_function)
+                process_function = partial(
+                    process_row, stats_function=stats_function
+                )
                 results = pool.map(
                     process_function,
                     batch,
@@ -133,4 +140,6 @@ def compute_p_values(hdf_path, n_processes=None, chunk_size=100_000):
                 columns=["chr", "start", "end", "name", "p_value"],  # type: ignore[arg-type]
             ).sort_values(["chr", "start", "end", "name"])
 
-            store.append("stats", stats_chunk, format="table", data_columns=True)
+            store.append(
+                "stats", stats_chunk, format="table", data_columns=True
+            )

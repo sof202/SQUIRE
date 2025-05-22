@@ -60,7 +60,10 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
             )
             if mode_to_use == "w":
                 store.append(
-                    f"data/{basename}", chunk, format="table", data_columns=True
+                    f"data/{basename}",
+                    chunk,
+                    format="table",
+                    data_columns=True,
                 )
             else:
                 store.append(f"data/{basename}", chunk)
@@ -73,7 +76,9 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
         data_paths = [key for key in store.keys() if key.startswith("/data/")]
         for path in data_paths:
             for chunk in store.select(
-                path, columns=["chr", "start", "end", "name"], chunksize=chunk_size
+                path,
+                columns=["chr", "start", "end", "name"],
+                chunksize=chunk_size,
             ):
                 all_coordinates.append(chunk)
 
@@ -91,7 +96,9 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
                 }
             )
         )
-        store.put("coordinates", coordinates, format="table", data_columns=True)
+        store.put(
+            "coordinates", coordinates, format="table", data_columns=True
+        )
         store.create_table_index(
             "coordinates", columns=["chr", "start", "end"], kind="full"
         )

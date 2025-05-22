@@ -91,12 +91,17 @@ def main():
         description="A utility to generate inputs for HyLoRD",
         formatter_class=SquireMainHelpFormatter,
     )
-    parser.add_argument("-v", "--version", action="version", version=version("squire"))
+    parser.add_argument(
+        "-v", "--version", action="version", version=version("squire")
+    )
     shared_parser = argparse.ArgumentParser(
         add_help=False, formatter_class=SquireSubparserHelpFormatter
     )
     shared_parser.add_argument(
-        "-d", "--hdf5", required=True, help="Path to hdf5 file (e.g. ./squire.h5)"
+        "-d",
+        "--hdf5",
+        required=True,
+        help="Path to hdf5 file (e.g. ./squire.h5)",
     )
     shared_parser.add_argument(
         "-o",
@@ -122,9 +127,13 @@ def main():
     )
     input_group = parser_create.add_argument_group(
         "input options (use one of)",
-        description="Specify input files using either --bedmethyl-list OR --file",
+        description=(
+            "Specify input files using either --bedmethyl-list OR --file"
+        ),
     )
-    bedmethyl_parse_group = input_group.add_mutually_exclusive_group(required=True)
+    bedmethyl_parse_group = input_group.add_mutually_exclusive_group(
+        required=True
+    )
 
     bedmethyl_parse_group.add_argument(
         "-b",
@@ -138,7 +147,10 @@ def main():
     bedmethyl_parse_group.add_argument(
         "-f",
         "--file",
-        help="Path to a file containing newline-separated list of bedmethyl files",
+        help=(
+            "Path to a file containing newline-separated list of "
+            "bedmethyl files"
+        ),
     )
 
     # -------------
@@ -153,7 +165,8 @@ def main():
     parser_reference.add_argument(
         "out_path",
         help=(
-            "File path to write the reference matrix to (e.g. ./reference_matrix.bed)"
+            "File path to write the reference matrix to "
+            "(e.g. ./reference_matrix.bed)"
         ),
     )
 
@@ -170,7 +183,8 @@ def main():
         formatter_class=SquireSubparserHelpFormatter,
     )
     parser_cpglist.add_argument(
-        "out_path", help="File path to write the CpG list to (e.g. ./cpg_list.bed)"
+        "out_path",
+        help="File path to write the CpG list to (e.g. ./cpg_list.bed)",
     )
     parser_cpglist.add_argument(
         "-t",

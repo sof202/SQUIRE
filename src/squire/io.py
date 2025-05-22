@@ -32,7 +32,8 @@ def make_viable_path(path: Path, exists_ok=True):
     try:
         if (not exists_ok) and (path.exists()):
             raise FileExistsError(
-                f"{path} already exists, if this is expected rerun with -o/--overwrite"
+                f"{path} already exists. "
+                "If this is expected rerun with -o/--overwrite"
             )
         make_parents(path)
     except PermissionError:
@@ -105,7 +106,9 @@ def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
             f"Error: {str(e)}"
         ) from e
     except Exception as e:
-        raise BedMethylReadError(f"Unexpected error reading {bedmethyl_path}") from e
+        raise BedMethylReadError(
+            f"Unexpected error reading {bedmethyl_path}"
+        ) from e
 
 
 def validate_hdf5(hdf_path: Path):
@@ -136,9 +139,15 @@ def export_reference_matrix(hdf_path, out_file_path):
     """
     with pd.HDFStore(hdf_path, mode="r") as store:
         merged = store["merged_data"]
-        fraction_columns = [col for col in merged.columns if "_fraction" in col]
+        fraction_columns = [
+            col for col in merged.columns if "_fraction" in col
+        ]
         merged[fraction_columns].reset_index().to_csv(
-            out_file_path, sep="\t", float_format="%.3f", header=False, index=False
+            out_file_path,
+            sep="\t",
+            float_format="%.3f",
+            header=False,
+            index=False,
         )
 
 
