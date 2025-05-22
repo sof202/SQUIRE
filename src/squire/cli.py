@@ -76,8 +76,10 @@ def float_list(string):
     """Convert a comma separated string into a list of floats"""
     try:
         return [float(number) for number in string.split(",")]
-    except ValueError:
-        raise ValueError("Thresholds must be comma separated list of floats")
+    except ValueError as e:
+        raise ValueError(
+            "Thresholds must be comma separated list of floats"
+        ) from e
 
 
 def main():
