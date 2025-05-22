@@ -108,6 +108,8 @@ def print_threshold_analysis(args: ReportArgs) -> None:
     """
     try:
         validate_hdf5(args.hdf5)
-        pvalue_threshold_report(args.hdf5, args.thresholds)
+        pvalue_threshold_report(
+            args.hdf5, args.thresholds, args.machine_parsable
+        )
     except (PermissionError, FileExistsError) as e:
         raise SquireError("SQUIRE failed to report threshold analysis") from e

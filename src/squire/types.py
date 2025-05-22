@@ -47,6 +47,7 @@ class CpGListArgs(SharedArgs):
 class ReportArgs(SharedArgs):
     """Arguments for the 'report' subcommand"""
 
+    machine_parsable: bool
     thresholds: list[float] = field(
         default_factory=lambda: [1e-1, 1e-2, 1e-5, 1e-10, 1e-20]
     )

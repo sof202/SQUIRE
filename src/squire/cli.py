@@ -235,6 +235,13 @@ def main() -> None:
         default=[1e-1, 1e-2, 1e-5, 1e-10, 1e-20],
         type=float_list,
     )
+    parser_report.add_argument(
+        "-m",
+        "--machine-parsable",
+        help="Whether to print the report in a parsable format or not.",
+        action="store_true",
+    )
+
     args = parser.parse_args()
     typed_args = convert_to_squire_args(args)
     run_squire(typed_args)
