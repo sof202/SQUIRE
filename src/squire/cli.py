@@ -56,6 +56,7 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
 
 def file_list(string):
     return [file for file in string.casefold().split(",")]
+    return [file for file in string.split(",")]
 
 
 def float_list(string):
