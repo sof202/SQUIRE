@@ -1,13 +1,25 @@
 import multiprocessing
 from multiprocessing import Pool
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from scipy.stats import chi2_contingency
 from statsmodels.stats.proportion import proportions_ztest
 
+from squire.types import (
+    CountArray,
+    GenomicLociGenerator,
+    GenomicLocus,
+    GenomicLocusWithPValue,
+    PValue,
+    StatsFunction,
+)
 
-def generate_batch(store, chunk_size):
+
+def generate_batch(
+    store: pd.HDFStore, chunk_size: int
+) -> GenomicLociGenerator:
     """Generator function producing batches of merged data within hdf5 store"""
     bedmethyls = sorted(
         {
@@ -37,7 +49,9 @@ def generate_batch(store, chunk_size):
         yield batch
 
 
-def two_proportion_z_test(counts, read_depths):
+def two_proportion_z_test(
+    counts: CountArray, read_depths: CountArray
+) -> PValue:
     """Wrapper for proportions_ztest
 
     Handles scenarios that will break proportions_ztest, returning 1 instead
@@ -52,7 +66,9 @@ def two_proportion_z_test(counts, read_depths):
     return p_value
 
 
-def chi_squared_contingency(counts, read_depths):
+def chi_squared_contingency(
+    counts: CountArray, read_depths: CountArray
+) -> PValue:
     """Wrapper for chi2_contigency
 
     Returns 1 on failure and creates the contingency table to be used by
@@ -69,19 +85,23 @@ def chi_squared_contingency(counts, read_depths):
     )
     try:
         _, p_value, _, _ = chi2_contingency(contingency_table)
-        return p_value
+        return np.array(p_value)
     except ValueError:
         return 1
 
 
-def process_row(row, stats_function):
+def process_row(
+    row: GenomicLocus, stats_function: StatsFunction
+) -> GenomicLocusWithPValue:
     """Helper function for mulitprocessing map"""
     id, counts, read_depths = row
     p_value = stats_function(counts, read_depths)
     return (*id, p_value)
 
 
-def compute_p_values(hdf_path, n_processes=None, chunk_size=100_000):
+def compute_p_values(
+    hdf_path: Path, n_processes: int | None = None, chunk_size: int = 100_000
+) -> None:
     """Main function for computing p-values for generating cpg lists
 
     A statistical test is applied to each genomic locus present in the samples

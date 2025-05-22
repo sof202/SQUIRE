@@ -5,23 +5,23 @@ import pandas as pd
 from squire.squire_exceptions import BedMethylReadError, HDFReadError
 
 
-def read_file_of_files(path: Path):
+def read_file_of_files(path: Path) -> list[Path]:
     """Read and parse a fof into a list of paths"""
     file_list = []
-    with open(path, mode="r") as fof:
+    with open(path) as fof:
         for file in fof:
             file_list.append(Path(file))
     return file_list
 
 
-def make_parents(path: Path):
+def make_parents(path: Path) -> None:
     """Makes parent directories for a file path"""
     parent_dir = path.parent
     if not parent_dir.exists():
         parent_dir.mkdir(parents=True, exist_ok=True)
 
 
-def make_viable_path(path: Path, exists_ok=True):
+def make_viable_path(path: Path, exists_ok: bool = True) -> None:
     """Ensures a path is viable to use by squire
 
     Parameters
@@ -37,11 +37,15 @@ def make_viable_path(path: Path, exists_ok=True):
                 "If this is expected rerun with -o/--overwrite"
             )
         make_parents(path)
-    except PermissionError:
-        raise PermissionError(f"You do not have permissions to create {path}.")
+    except PermissionError as e:
+        raise PermissionError(
+            f"You do not have permissions to create {path}."
+        ) from e
 
 
-def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
+def validate_bedmethyl(
+    bedmethyl_path: Path, number_of_rows_to_check: int = 5
+) -> None:
     """Validates the format of a bedmethyl file
 
     Bedmethyl files have a specific format outlined by ONT's modkit. This
@@ -112,7 +116,7 @@ def validate_bedmethyl(bedmethyl_path: Path, number_of_rows_to_check=5):
         ) from e
 
 
-def validate_hdf5(hdf_path: Path):
+def validate_hdf5(hdf_path: Path) -> bool:
     """Validates the format of a hdf5 file"""
     if not hdf_path.exists():
         raise HDFReadError(f"{hdf_path} does not exist.")
@@ -121,11 +125,11 @@ def validate_hdf5(hdf_path: Path):
     try:
         with pd.HDFStore(hdf_path, mode="r"):
             return True
-    except (OSError, IOError) as e:
+    except OSError as e:
         raise HDFReadError(f"{hdf_path} is non-viable") from e
 
 
-def export_reference_matrix(hdf_path, out_file_path):
+def export_reference_matrix(hdf_path: Path, out_file_path: Path) -> None:
     """Writes reference matrix to file from hdf5 file
 
     Reference matrix is a tab separated file with the columns:
@@ -152,7 +156,9 @@ def export_reference_matrix(hdf_path, out_file_path):
         )
 
 
-def export_cpg_list(hdf_path, out_file_path, significance_threshold):
+def export_cpg_list(
+    hdf_path: Path, out_file_path: Path, significance_threshold: float
+) -> None:
     """Writes a list of genomic loci that pass a significance theshold
 
     CpG list is a tab separated file with the columns:

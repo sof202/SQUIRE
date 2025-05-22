@@ -1,14 +1,17 @@
 import os
+from pathlib import Path
 
 import pandas as pd
 
 
-def get_file_basename(file_path):
+def get_file_basename(file_path: Path) -> str:
     """Get the basename of a file for organisational purposes"""
     return os.path.splitext(os.path.basename(file_path))[0]
 
 
-def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
+def add_file_to_hdf_store(
+    file_path: Path, hdf_path: Path, chunk_size: int = 100_000
+) -> None:
     """Add bedmethyl data to a hdf5 store
 
     Only 6 columns are extracted from bedmethyl files:
@@ -70,7 +73,9 @@ def add_file_to_hdf_store(file_path, hdf_path, chunk_size=100_000):
                 store.append(f"data/{basename}", chunk)
 
 
-def generate_coordinate_index(hdf_path, chunk_size=100_000):
+def generate_coordinate_index(
+    hdf_path: Path, chunk_size: int = 100_000
+) -> None:
     """Generates a full index of genomic loci coordinates from hdf5 store"""
     with pd.HDFStore(hdf_path, mode="a") as store:
         all_coordinates = []
@@ -105,7 +110,7 @@ def generate_coordinate_index(hdf_path, chunk_size=100_000):
         )
 
 
-def create_merged_dataset(hdf_path):
+def create_merged_dataset(hdf_path: Path) -> None:
     """Merges all parsed bedmethyl files into a single dataframe
 
     Using a hdf5 store and the coordinate index created from

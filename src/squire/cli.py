@@ -1,6 +1,8 @@
 import argparse
 import sys
 from importlib.metadata import version
+from pathlib import Path
+from typing import LiteralString
 
 from squire.main import (
     create_hdf,
@@ -9,6 +11,10 @@ from squire.main import (
     write_reference_matrix,
 )
 from squire.squire_exceptions import SquireError
+from squire.types import (
+    SquireArgs,
+    convert_to_squire_args,
+)
 
 
 class SquireMainHelpFormatter(argparse.HelpFormatter):
@@ -18,7 +24,7 @@ class SquireMainHelpFormatter(argparse.HelpFormatter):
     {command 1, command 2, command 3} string
     """
 
-    def _format_action(self, action):
+    def _format_action(self, action: argparse.Action) -> LiteralString | str:
         if isinstance(action, argparse._SubParsersAction):
             parts = []
             for subaction in action._get_subactions():
@@ -35,19 +41,19 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
     - Places default lists on a new line for each option
     """
 
-    def _format_action_invocation(self, action):
+    def _format_action_invocation(self, action: argparse.Action) -> str:
         if not action.option_strings:
             (metavar,) = self._metavar_formatter(action, action.dest)(1)
             return metavar
         else:
             return ", ".join(action.option_strings)
 
-    def _format_action(self, action):
+    def _format_action(self, action: argparse.Action) -> str:
         if action.required:
             action.help = "[REQUIRED] " + (action.help or "")
         return super()._format_action(action)
 
-    def _get_help_string(self, action):
+    def _get_help_string(self, action: argparse.Action) -> str:
         help = action.help or ""
         if (
             action.default is not argparse.SUPPRESS
@@ -57,7 +63,7 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
             help += "\n(default: %(default)s)"
         return help
 
-    def _split_lines(self, text, width):
+    def _split_lines(self, text: str, width: int) -> list[str]:
         lines = []
         for line in text.split("\n"):
             if not line:
@@ -67,12 +73,12 @@ class SquireSubparserHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
         return lines
 
 
-def file_list(string):
+def file_list(string: str) -> list[Path]:
     """Convert a comma separated string into a list of file paths"""
-    return [file for file in string.split(",")]
+    return [Path(file) for file in string.split(",")]
 
 
-def float_list(string):
+def float_list(string: str) -> list[float]:
     """Convert a comma separated string into a list of floats"""
     try:
         return [float(number) for number in string.split(",")]
@@ -82,7 +88,7 @@ def float_list(string):
         ) from e
 
 
-def main():
+def main() -> None:
     """Main entry point for squire
 
     Handles argument parsing for the main parser and all subparsers
@@ -104,6 +110,7 @@ def main():
         "--hdf5",
         required=True,
         help="Path to hdf5 file (e.g. ./squire.h5)",
+        type=Path,
     )
     shared_parser.add_argument(
         "-o",
@@ -153,6 +160,7 @@ def main():
             "Path to a file containing newline-separated list of "
             "bedmethyl files"
         ),
+        type=Path,
     )
 
     # -------------
@@ -170,6 +178,7 @@ def main():
             "File path to write the reference matrix to "
             "(e.g. ./reference_matrix.bed)"
         ),
+        type=Path,
     )
 
     # -------------
@@ -187,6 +196,7 @@ def main():
     parser_cpglist.add_argument(
         "out_path",
         help="File path to write the CpG list to (e.g. ./cpg_list.bed)",
+        type=Path,
     )
     parser_cpglist.add_argument(
         "-t",
@@ -216,8 +226,8 @@ def main():
         type=float_list,
     )
     args = parser.parse_args()
-
-    run_squire(args)
+    typed_args = convert_to_squire_args(args)
+    run_squire(typed_args)
 
 
 COMMAND_MAP = {
@@ -228,7 +238,7 @@ COMMAND_MAP = {
 }
 
 
-def run_squire(args):
+def run_squire(args: SquireArgs) -> None:
     """Runs functions to execute squire subcommands"""
     try:
         command = COMMAND_MAP.get(args.command)

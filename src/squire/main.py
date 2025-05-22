@@ -16,9 +16,10 @@ from squire.io import (
 from squire.reports import pvalue_threshold_report
 from squire.squire_exceptions import SquireError
 from squire.stats import compute_p_values
+from squire.types import CpGListArgs, CreateArgs, ReferenceArgs, ReportArgs
 
 
-def create_hdf(args):
+def create_hdf(args: CreateArgs) -> None:
     """Intialise hdf5 file for other commands to read from
 
     Uses a list of bedmethyl files (list can be generated from a file of files)
@@ -36,67 +37,64 @@ def create_hdf(args):
         describing how different the underlying distributions of each cell
         type is for that genomic locus.
     """
-    hdf5_path = Path(args.hdf5)
     try:
-        make_viable_path(hdf5_path, args.overwrite)
-        if args.file is not None:
-            file_list = read_file_of_files(args.file)
-        else:
-            file_list = args.bedmethyl_list
+        make_viable_path(args.hdf5, args.overwrite)
+        file_list = (
+            read_file_of_files(args.file)
+            if args.file is not None
+            else args.bedmethyl_list
+        )
+        assert file_list is not None
+
         for bedmethyl in file_list:
             bedmethyl = Path(bedmethyl)
             validate_bedmethyl(bedmethyl)
-            add_file_to_hdf_store(bedmethyl, hdf5_path)
+            add_file_to_hdf_store(bedmethyl, args.hdf5)
 
-        generate_coordinate_index(hdf5_path)
-        create_merged_dataset(hdf5_path)
-        compute_p_values(hdf5_path)
+        generate_coordinate_index(args.hdf5)
+        create_merged_dataset(args.hdf5)
+        compute_p_values(args.hdf5)
 
     except (PermissionError, FileExistsError) as e:
-        raise SquireError(f"SQUIRE failed to create {hdf5_path}.") from e
+        raise SquireError(f"SQUIRE failed to create {args.hdf5}.") from e
 
 
-def write_reference_matrix(args):
+def write_reference_matrix(args: ReferenceArgs) -> None:
     """Write a reference matrix (for HyLoRD) using a hdf5 file
 
     This is a wrapper for the `export_reference_matrix` function, it tests
     file viability before writing to the given path
     """
-    hdf5_path = Path(args.hdf5)
-    ref_path = Path(args.out_path)
     try:
-        validate_hdf5(hdf5_path)
-        make_viable_path(ref_path, args.overwrite)
-        export_reference_matrix(hdf5_path, ref_path)
+        validate_hdf5(args.hdf5)
+        make_viable_path(args.out_path, args.overwrite)
+        export_reference_matrix(args.hdf5, args.out_path)
     except (PermissionError, FileExistsError) as e:
-        raise SquireError(f"SQUIRE failed to write to {ref_path}") from e
+        raise SquireError(f"SQUIRE failed to write to {args.out_path}") from e
 
 
-def write_cpg_list(args):
+def write_cpg_list(args: CpGListArgs) -> None:
     """Write a CpG list (for HyLoRD) using a hdf5 file
 
     This is a wrapper for the `export_cpg_list` function, it tests file
     viability before writing to the given path
     """
-    hdf5_path = Path(args.hdf5)
-    cpg_list_path = Path(args.out_path)
     try:
-        validate_hdf5(hdf5_path)
-        make_viable_path(cpg_list_path, args.overwrite)
-        export_cpg_list(hdf5_path, cpg_list_path, args.threshold)
+        validate_hdf5(args.hdf5)
+        make_viable_path(args.out_path, args.overwrite)
+        export_cpg_list(args.hdf5, args.out_path, args.threshold)
     except (PermissionError, FileExistsError) as e:
-        raise SquireError(f"SQUIRE failed to write to {cpg_list_path}") from e
+        raise SquireError(f"SQUIRE failed to write to {args.out_path}") from e
 
 
-def print_threshold_analysis(args):
+def print_threshold_analysis(args: ReportArgs) -> None:
     """Generate a report for p-value threshold analysis
 
     This is a wrapper for the pvalue_threshold_report function, it tests for
     hdf5 file viability before running the function
     """
-    hdf5_path = Path(args.hdf5)
     try:
-        validate_hdf5(hdf5_path)
-        pvalue_threshold_report(hdf5_path, args.thresholds)
+        validate_hdf5(args.hdf5)
+        pvalue_threshold_report(args.hdf5, args.thresholds)
     except (PermissionError, FileExistsError) as e:
         raise SquireError("SQUIRE failed to report threshold analysis") from e
