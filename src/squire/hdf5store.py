@@ -79,7 +79,7 @@ def generate_coordinate_index(
     """Generates a full index of genomic loci coordinates from hdf5 store"""
     with pd.HDFStore(hdf_path, mode="a") as store:
         all_coordinates = []
-        data_paths = [key for key in store.keys() if key.startswith("/data/")]
+        data_paths = [key for key in store if key.startswith("/data/")]
         for path in data_paths:
             for chunk in store.select(
                 path,
@@ -114,7 +114,7 @@ def add_bedmethyls_to_merged_data(
     store: pd.HDFStore, merged: pd.DataFrame
 ) -> None:
     """Add bedmethyl files to the combined merged data"""
-    bedmethyl_paths = [k for k in store.keys() if k.startswith("/data/")]
+    bedmethyl_paths = [k for k in store if k.startswith("/data/")]
 
     for path in bedmethyl_paths:
         bedmethyl = store[path].set_index(["chr", "start", "end", "name"])
