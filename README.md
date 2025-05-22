@@ -1,11 +1,19 @@
 # SQUIRE
 
-**S**tatistical **Q**uality **U**tility for **I**deal **R**eference matrix
-**E**nhancement
+## Table of contents
+
+* [Description](#description)
+  * [Why not package with HyLoRD](#why-not-package-with-hylord)
+* [Software Requirements](#software-requirements)
+* [Installation](#installation)
+  * [Updating](#updating)
+* [Usage](#usage)
+  * [Job schedulers](#job-schedulers)
 
 ## Description
 
-This is a set of python scripts that are to be used with
+SQUIRE(Statistical Quality Utility for Ideal Reference matrix Enhancement) is a
+set of python scripts that are to be used with
 [HyLoRD](https://github.com/sof202/HyLoRD). The
 [inputs](https://sof202.github.io/HyLoRD/inputs-outputs.html) of HyLoRD include
 a reference matrix and a list of 'useful' CpGs, however the creation of these
