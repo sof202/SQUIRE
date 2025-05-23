@@ -10,7 +10,7 @@ def read_file_of_files(path: Path) -> list[Path]:
     file_list = []
     with open(path) as fof:
         for file in fof:
-            file_list.append(Path(file))
+            file_list.append(Path(file.replace("\n", "")))
     return file_list
 
 
