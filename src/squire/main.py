@@ -54,7 +54,7 @@ def create_hdf(args: CreateArgs) -> None:
     """
     try:
         make_viable_path(args.hdf5, args.overwrite)
-        if args.overwrite:
+        if args.overwrite and os.path.exists(args.hdf5):
             os.remove(args.hdf5)
         add_bedmethyl_list_to_hdf_data(args)
         generate_coordinate_index(args.hdf5)
