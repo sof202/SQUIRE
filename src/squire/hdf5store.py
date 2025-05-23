@@ -9,9 +9,7 @@ def get_file_basename(file_path: Path) -> str:
     return os.path.splitext(os.path.basename(file_path))[0]
 
 
-def add_file_to_hdf_store(
-    file_path: Path, hdf_path: Path, chunk_size: int = 100_000
-) -> None:
+def add_file_to_hdf_store(file_path: Path, hdf_path: Path) -> None:
     """Add bedmethyl data to a hdf5 store
 
     Only 6 columns are extracted from bedmethyl files:
@@ -47,30 +45,26 @@ def add_file_to_hdf_store(
         f"{basename}_read_depth": int,
         f"{basename}_modifications": int,
     }
+    bedmethyl = pd.read_csv(
+        file_path,
+        sep=r"\s+",  # bedmethyl has mix of tabs and spaces for separators
+        header=None,
+        usecols=columns_to_keep,  # type: ignore[arg-type]
+        names=column_names,
+        dtype=column_dtypes,  # type: ignore[arg-type]
+    )
+    bedmethyl[f"{basename}_fraction"] = (
+        bedmethyl[f"{basename}_modifications"]
+        / bedmethyl[f"{basename}_read_depth"]
+        * 100
+    )
     with pd.HDFStore(hdf_path, mode=mode_to_use) as store:
-        for chunk in pd.read_csv(
-            file_path,
-            sep=r"\s+",  # bedmethyl has mix of tabs and spaces for separators
-            header=None,
-            usecols=columns_to_keep,  # type: ignore[arg-type]
-            names=column_names,
-            dtype=column_dtypes,  # type: ignore[arg-type]
-            chunksize=chunk_size,
-        ):
-            chunk[f"{basename}_fraction"] = (
-                chunk[f"{basename}_modifications"]
-                / chunk[f"{basename}_read_depth"]
-                * 100
-            )
-            if mode_to_use == "w":
-                store.append(
-                    f"data/{basename}",
-                    chunk,
-                    format="table",
-                    data_columns=True,
-                )
-            else:
-                store.append(f"data/{basename}", chunk)
+        store.append(
+            f"data/{basename}",
+            bedmethyl,
+            format="table",
+            data_columns=True,
+        )
 
 
 def generate_coordinate_index(
