@@ -23,7 +23,7 @@ def generate_batch(
     """Generator function producing batches of merged data within hdf5 store"""
     bedmethyls = sorted(
         {
-            col.split("_")[0:-1]
+            "_".join(col.split("_")[0:-1])
             for col in store["merged_data"].columns
             if "_modifications" in col
         }
