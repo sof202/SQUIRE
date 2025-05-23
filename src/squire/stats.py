@@ -1,4 +1,5 @@
 import multiprocessing
+import warnings
 from multiprocessing import Pool
 from pathlib import Path
 
@@ -60,10 +61,13 @@ def two_proportion_z_test(
     valid_indexes = read_depths > 0
     if sum(valid_indexes) < 2:
         return 1
-    _, p_value = proportions_ztest(counts, read_depths)
-    if np.isnan(p_value):
+    try:
+        _, p_value = proportions_ztest(counts, read_depths)
+        if np.isnan(p_value):
+            return 1
+        return p_value
+    except RuntimeWarning:
         return 1
-    return p_value
 
 
 def chi_squared_contingency(
@@ -143,6 +147,7 @@ def compute_p_values(
             stats_function = chi_squared_contingency
 
     with pd.HDFStore(hdf_path, mode="r+") as store:
+        warnings.filterwarnings("error")
         for batch in generate_batch(store, chunk_size):
             with Pool(n_processes) as pool:
                 from functools import partial
@@ -164,3 +169,4 @@ def compute_p_values(
             store.append(
                 "stats", stats_chunk, format="table", data_columns=True
             )
+        warnings.resetwarnings()
