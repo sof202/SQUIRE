@@ -1,3 +1,5 @@
+import os
+
 from squire.hdf5store import (
     add_file_to_hdf_store,
     add_to_merged_dataset,
@@ -52,6 +54,8 @@ def create_hdf(args: CreateArgs) -> None:
     """
     try:
         make_viable_path(args.hdf5, args.overwrite)
+        if args.overwrite:
+            os.remove(args.hdf5)
         add_bedmethyl_list_to_hdf_data(args)
         generate_coordinate_index(args.hdf5)
         create_merged_dataset(args.hdf5)
