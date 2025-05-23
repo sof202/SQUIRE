@@ -3,6 +3,8 @@ from pathlib import Path
 
 import pandas as pd
 
+from squire.sorting import chromosome_sorter
+
 
 def get_file_basename(file_path: Path) -> str:
     """Get the basename of a file for organisational purposes"""
@@ -85,7 +87,12 @@ def generate_coordinate_index(
         coordinates = (
             pd.concat(all_coordinates, ignore_index=True)
             .drop_duplicates()
-            .sort_values(by=["chr", "start", "end", "name"])
+            .sort_values(
+                by=["chr", "start", "end", "name"],
+                key=lambda x: x.map(chromosome_sorter)
+                if x.name == "chr"
+                else x,
+            )
             .reset_index(drop=True)
             .astype(
                 {

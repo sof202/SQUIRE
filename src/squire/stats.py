@@ -8,6 +8,7 @@ import pandas as pd
 from scipy.stats import chi2_contingency
 from statsmodels.stats.proportion import proportions_ztest
 
+from squire.sorting import chromosome_sorter
 from squire.types import (
     CountArray,
     GenomicLociGenerator,
@@ -164,7 +165,12 @@ def compute_p_values(
             stats_chunk = pd.DataFrame(
                 results,
                 columns=["chr", "start", "end", "name", "p_value"],  # type: ignore[arg-type]
-            ).sort_values(["chr", "start", "end", "name"])
+            ).sort_values(
+                ["chr", "start", "end", "name"],
+                key=lambda x: x.map(chromosome_sorter)
+                if x.name == "chr"
+                else x,
+            )
 
             store.append(
                 "stats", stats_chunk, format="table", data_columns=True
