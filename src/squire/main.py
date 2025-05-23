@@ -51,6 +51,15 @@ def create_hdf(args: CreateArgs) -> None:
       - A pandas dataframe containing the p-values for each position,
         describing how different the underlying distributions of each cell
         type is for that genomic locus.
+
+    Timing
+    ---
+    With 2 9GB files, this takes ~40 minutes to add and merge the files and
+    another hour to compute all of the p-values (~2.5 million).
+        - File reading and merging is single threaded and so should be mainly
+          dependent on the number and size of the files being used.
+        - pvalue calculations are processed in parallel. This timing was taken
+          from a 'Intel(R) Xeon(R) CPU E5-2640 v3 @ 2.60GHz' processor
     """
     try:
         make_viable_path(args.hdf5, args.overwrite)
