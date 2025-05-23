@@ -1,6 +1,6 @@
 [project]
 name = "squire"
-version = "0.1.0"
+version = "0.1.1"
 description = "Statistical Quality Utility for Ideal Reference matrix Enhancement"
 authors = [
     {name = "Sam Fletcher", email = "s.o.fletcher@exeter.ac.uk"},
