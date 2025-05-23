@@ -29,25 +29,25 @@ def add_file_to_hdf_store(
     Files are read and parsed in chunks to save on memory.
     """
     mode_to_use = "w" if not os.path.exists(hdf_path) else "a"
+    columns_to_keep = [0, 1, 2, 3, 4, 11]
+    basename = get_file_basename(file_path)
+    column_names = [
+        "chr",
+        "start",
+        "end",
+        "name",
+        f"{basename}_read_depth",
+        f"{basename}_modifications",
+    ]
+    column_dtypes = {
+        "chr": str,
+        "start": int,
+        "end": int,
+        "name": str,
+        f"{basename}_read_depth": int,
+        f"{basename}_modifications": int,
+    }
     with pd.HDFStore(hdf_path, mode=mode_to_use) as store:
-        columns_to_keep = [0, 1, 2, 3, 4, 11]
-        basename = get_file_basename(file_path)
-        column_names = [
-            "chr",
-            "start",
-            "end",
-            "name",
-            f"{basename}_read_depth",
-            f"{basename}_modifications",
-        ]
-        column_dtypes = {
-            "chr": str,
-            "start": int,
-            "end": int,
-            "name": str,
-            f"{basename}_read_depth": int,
-            f"{basename}_modifications": int,
-        }
         for chunk in pd.read_csv(
             file_path,
             sep=r"\s+",  # bedmethyl has mix of tabs and spaces for separators
