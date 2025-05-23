@@ -49,9 +49,10 @@ completely optional.
 
 ## Software Requirements
 
-- [bash](https://www.gnu.org/software/bash/)
-- [poetry](https://github.com/python-poetry/poetry)
 - [git](https://git-scm.com/)
+- [bash](https://www.gnu.org/software/bash/)
+- [python](https://www.python.org/) [>=3.12]
+- [poetry](https://github.com/python-poetry/poetry) [>=2.1.3]
 
 ## Installation
 
